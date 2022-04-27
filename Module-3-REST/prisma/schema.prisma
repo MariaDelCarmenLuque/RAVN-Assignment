@@ -1,0 +1,81 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+    id              Int       @id @default(autoincrement())
+    // uuid        String    @unique @default(uuid()) @db.Uuid
+    firstName       String    @map("first_name")
+    lastName        String    @map("last_name")
+    email           String    @unique
+    password        String
+    imageUrl        String    @map("image_url")
+    role            Role      @default(USER)
+    isEmailPublic   Boolean   @default(false) @map("is_email_public")
+    isFLnamePublic  Boolean   @default(false) @map("is_first_lastname_public")
+    createdAt       DateTime  @default(now()) @map("created_at")
+    updatedAt       DateTime  @updatedAt @map("updated_at")
+    deleteddAt      DateTime  @updatedAt @map("deleted_at")
+    posts           Post[]
+    comments        Comment[]
+    tokens          Token[]
+  @@map("accounts")
+}
+model Post {
+    id          Int      @id @default(autoincrement())
+    isDraft     Boolean  @default(true) @map("is_draft")
+    title       String   @db.VarChar(255)
+    content     String?   @db.Text  
+    image       String?  
+    createdAt   DateTime @default(now()) @map("created_at")
+    updatedAt   DateTime @updatedAt @map("updated_at")
+    deleteddAt  DateTime  @updatedAt @map("deleted_at")
+    author      User     @relation(fields: [authorId], references: [id])
+    authorId    Int
+    comments    Comment[]
+    categories  Category[]
+  @@map("posts")
+}
+
+model Comment {
+     id         Int      @id @default(autoincrement())
+    isDraft     Boolean  @default(true) @map("is_draft")
+    content     String   @db.VarChar(255)
+    createdAt   DateTime @default(now()) @map("created_at")
+    updatedAt   DateTime @updatedAt @map("updated_at")
+    deleteddAt  DateTime  @updatedAt @map("deleted_at")
+    author      User     @relation(fields: [authorId], references: [id])
+    authorId    Int
+    Post        Post?   @relation(fields: [postId], references: [id])
+    postId      Int?
+  @@map("comments")
+}
+model Category {
+  id        Int    @id @default(autoincrement())
+  name      String
+  posts     Post[] @relation(references: [id])
+  @@map("categories")
+}
+
+model Token {
+  id            Int      @id @default(autoincrement())
+  jti           String   @unique @default(uuid())
+  refreshToken  String   @unique @map("refresh_token")
+  createdAt     DateTime @default(now()) @map(name: "created_at")
+  expiredAt     DateTime @map("expired_at")
+  user          User?    @relation(fields: [userId], references: [id])
+  userId        Int?     @map(name: "user_id")
+  @@map("tokens")
+}
+enum Role {
+    USER 
+    ADMIN
+}
