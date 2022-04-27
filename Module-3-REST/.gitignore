@@ -16,3 +16,6 @@ jspm_packages/
 .env
 .env.test
 .env.production
+
+# generate output
+dist
