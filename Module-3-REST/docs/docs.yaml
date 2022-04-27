@@ -1,0 +1,870 @@
+openapi: 3.0.1
+info: 
+  title: Swagger Microblog
+  description: This is the documentation for the Nodejs REST API assignment.
+  version: 1.0.0
+servers:
+  - url: /api/v1
+    description: version 1
+    
+tags:
+- name: Auth
+  description: Authentication 
+- name: Post
+  description: Post by User. AUTHENTICATED USERS can only update or delete their posts and an ADMIN can update or delete any post.
+- name: Comment
+  description: Comments by Post. AUTHENTICATED USERS can only update or delete their comments and an ADMIN can update or delete any comment.
+- name: Likes
+  description: Likes and dislikes in post and comments
+- name: Accounts
+  description: Operations about user 
+paths:
+  /auth/register:
+    post:
+      tags:
+      - Auth
+      summary: Sign up - Confirmation of a registered user
+      
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                firstname:
+                  type: string
+                lastname:
+                  type: string
+                username:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        201:
+          description: Created and send email
+       
+        409:
+          description: The user is allready registered
+          content:
+             application/json:
+              schema: 
+                $ref: '#/components/schemas/Error'
+   
+  /auth/passwordReset:
+    post:
+      tags:
+      - Auth
+      summary: Reset password of a registered user
+      requestBody:
+        required: true
+        content:
+         application/json:
+            schema:
+              properties:
+                tokenTransaction: 
+                  type: string
+                newPassword:
+                  type: string
+      responses:
+        200:
+          description: Reset password successfully
+          
+        404:
+          description: User not found
+          content:
+             application/json:
+              schema: 
+                $ref: '#/components/schemas/Error'
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Sign in
+      requestBody:
+        required: true
+        content:  
+          application/json:
+            schema:
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        401:
+            description: Unathorized
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        400:
+            description: Bad Request
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        
+  /auth/logout:
+    post:
+      tags:
+      - Auth
+      summary: Sign out
+      responses:
+        204:
+          description: No content
+      security:
+        - api_key: []
+  /accounts:
+    post:
+      tags:
+      - Accounts
+      summary: Create a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserDto'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+      security:
+        - api_key: []
+    patch:
+      tags:
+      - Accounts
+      summary: Update user profile.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserDto'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+      security:
+        - api_key: []
+  /posts:
+    get:
+      tags:
+      - Post
+      summary: Get all posts.
+      parameters:
+        - name: categoryId
+          in: query
+          description: Filter by category id to posts.
+          example: 3
+          schema:
+            type: integer
+        - $ref: '#/components/parameters/limitParam'   
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                items:
+                  type: array
+                  $ref: '#/components/schemas/Post'
+                  
+    post:
+      tags:
+      - Post
+      summary: Create a new Post.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePostDto'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+      security:
+        - api_key: []   
+      
+                
+  /posts/{postId}:
+    patch:
+      tags:
+      - Post
+      summary: Update a post
+      parameters:
+      - $ref: '#/components/parameters/postIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePostDto'
+      responses:
+       200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+       403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - api_key: []
+      
+    delete:
+      tags:
+      - Post
+      summary: Delete a post
+      parameters:
+      - $ref: '#/components/parameters/postIdParam'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletePost'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - api_key: []
+      
+  /posts/{postId}/comments:
+    get:
+      tags:
+      - Comment
+      summary: Get all comments to a post.
+      parameters:
+        - $ref: '#/components/parameters/limitParam'  
+        - $ref: '#/components/parameters/postIdParam' 
+          
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                items:
+                  type: array
+                  properties:
+                  $ref: '#/components/schemas/Comment'
+    post:
+      tags:
+      - Comment
+      summary: Create a new Comment.
+      parameters:
+      - $ref: '#/components/parameters/postIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommentDto'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - api_key: []
+  
+  /posts/{postId}/comments/{commentId}:
+    patch:
+      tags:
+      - Comment
+      summary: Update a Comment
+      parameters:
+      - $ref: '#/components/parameters/postIdParam'
+      - $ref: '#/components/parameters/commentIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCommentDto'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - api_key: []
+      
+    delete:
+      tags:
+      - Comment
+      summary: Delete a comment
+      parameters:
+      - $ref: '#/components/parameters/postIdParam'
+      - $ref: '#/components/parameters/commentIdParam'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteComment'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - api_key: []
+  /posts/{postId}/likes:
+    patch:
+      tags:
+      - Likes
+      summary: Likes or dislike a post.
+      parameters:
+      - $ref: '#/components/parameters/postIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLikeDto'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Like'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - api_key: []
+    
+    delete:
+      tags:
+      - Likes
+      summary: Delete a like or dislike in a post
+      parameters:
+      - $ref: '#/components/parameters/postIdParam'
+      responses:
+       200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: 
+                    type: integer
+       403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                  
+      security:
+      - api_key: []
+  /posts/{postId}/comments/{commentId}/likes:
+    patch:
+      tags:
+      - Likes
+      summary: Likes or dislike a comment.
+      parameters:
+      - $ref: '#/components/parameters/postIdParam'
+      - $ref: '#/components/parameters/commentIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLikeDto'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Like'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        403:
+          description: Fprbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Like'
+      security:
+      - api_key: []
+    delete:
+      tags:
+      - Likes
+      summary: Delete a like or dislike in a comment
+      parameters:
+      - $ref: '#/components/parameters/postIdParam'
+      - $ref: '#/components/parameters/commentIdParam'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: 
+                    type: integer
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        403:
+          description: Fprbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Like'
+                  
+      security:
+      - api_key: []
+      
+components:
+  parameters:
+    pageParam:
+        name: page
+        in: query
+        description: Quantify pages
+        example: 2
+        schema:
+          type: integer  
+    limitParam:
+        name: limit
+        in: query
+        description: Quantify results per page
+        example: 10
+        schema:
+          type: integer   
+    postIdParam:
+        name: postId
+        in: path
+        schema:
+          type: integer
+        required: true
+        example: 3
+    commentIdParam:
+        name: commentId
+        in: path
+        schema:
+          type: integer
+        required: true
+        example: 1
+    userIdParam:
+        name: userId
+        in: path
+        description: User Id.
+        required: true
+        example: 5
+        schema:
+          type: integer  
+  schemas:
+    CreateUserDto:
+      type: object
+      required:
+      - username
+      - password
+      - email
+      - role
+      properties:
+        firstname:
+          type: string
+          description: User's firtname.
+        lastname:
+          type: string
+          description: User's lastname.
+        username:
+          type: string
+          description: User's username.
+        email:
+          type: string
+          description: User's email.
+        imageUrl:
+          type: string
+          description: User's Photo profile.
+        role:
+          type: string
+          description: User's role.
+    UpdateUserDto:
+      type: object
+      properties:
+        firstname:
+          type: string
+          description: User's firtname.
+        lastname:
+          type: string
+          description: User's lastname.
+        username:
+          type: string
+          description: User's username.
+        email:
+          type: string
+          description: User's email.
+        imageUrl:
+          type: string
+          description: User's Photo profile.
+        role:
+          type: string
+          description: User's role.
+        isEmailPublic:
+          type: boolean
+          description: Status of User's email.
+        isFirstLastNamePublic:
+          type: boolean
+          description: Status of User's firstname and lastname.
+    User:
+      type: object
+      required: 
+        - email
+        - password
+        - role
+      properties:
+        id:
+          type: integer
+          format: uuid
+          readOnly: true
+        firstname:
+          type: string
+          description: User's firtname.
+        lastname:
+          type: string
+          description: User's lastname.
+        username:
+          type: string
+          description: User's username.
+        email:
+          type: string
+          format: email
+          description: User's email.
+        role:
+          type: string
+          enum: 
+            - moderator
+            - user
+          description: User's role.
+        imageUrl:
+          type: string
+          description: User's image url.
+        isEmailPublic:
+          type: boolean
+          description: Status of User's email.
+        isFirstLastNamePublic:
+          type: boolean
+          description: Status of User's firstname and lastname.
+        createdAt:
+          type: string
+          format: date
+          description: Date of created User.
+        updatedAt:
+          type: string
+          format: date
+          description: Date of updated User.
+        deletedAt:
+          type: string
+          format: date
+          description: Date of deleted User.
+    Post:
+      type: object
+      required:
+      - userId
+      - categoryId
+      properties:
+        id:
+          type: integer
+          description: Post's id.
+        userId:
+          type: integer
+          description: User's id
+        categoryId:
+          type: integer
+          description: Post's category
+        title:
+          type: string
+          description: Post's title.
+        brief:
+          type: string
+          description: Post's title.
+        image:
+          type: string
+          description: Post's image url.
+        content:
+          type: object
+          description: Post's content.
+        createdAt:
+          type: string
+          format: date
+          description: Date of created Post
+        updatedAt:
+          type: string
+          format: date
+          description: Date of updated Post.
+        deletedAt:
+          type: string
+          format: date
+          description: Date of deleted Post.
+    
+    CreatePostDto:
+      type: object
+      properties:
+        categoryId:
+          type: integer
+          description: Post's category
+        title:
+          type: string
+          description: Post's title.
+        brief:
+          type: string
+          description: Post's title.
+        image:
+          type: string
+          description: Post's image url.
+        isDraft:
+          type: boolean
+          description: Post draft status.
+        content:
+          type: object
+          description: Post's content.
+    UpdatePostDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Post's id.
+        categoryId:
+          type: integer
+          description: Post's category
+        title:
+          type: string
+          description: Post's title.
+        brief:
+          type: string
+          description: Post's title.
+        image:
+          type: string
+          description: Post's image url.
+        isDraft:
+          type: boolean
+          description: Post draft status.
+        content:
+          type: object
+          description: Post's content.
+        updatedAt:
+          type: string
+          format: date
+          description: Date of updated Post.
+          
+    DeletePost:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Post's id.
+        deletedAt:
+          type: string
+          format: date
+          description: Date of deleted Post
+          
+    Comment:
+      type: object
+      required:
+      - postId
+      - userId
+      properties:
+        id:
+          type: integer
+          description: Comment's id.
+        postId:
+          type: integer
+          description: Comment post id.
+        userId:
+          type: integer
+          description: Comment user id.
+        content:
+          type: string
+          description: Comment's content.
+        isDraft:
+          type: boolean
+          description: Post draft status.
+        createdAt:
+          type: string
+          format: date
+          description: Date of created Comment.
+        updatedAt:
+          type: string
+          format: date
+          description: Date of updated Comment.
+        deletedAt:
+          type: string
+          format: date
+          description: Date of updated Comment.
+    CreateCommentDto:
+      type: object
+      properties:
+        postId:
+          type: integer
+          description: Comment post id.
+        content:
+          type: string
+          description: Comment's content.
+        isDraft:
+          type: boolean
+          description: Post draft status.
+        createdAt:
+          type: string
+          format: date
+          description: Date of created Comment.
+    UpdateCommentDto:
+      type: object
+      properties:
+        content:
+          type: string
+          description: Comment's content.
+        isDraft:
+          type: boolean
+          description: Comment draft status.
+    DeleteComment:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Comment's id.
+        deletedAt:
+          type: string
+          format: date
+          description: Date of deleted Comment
+    Like:
+      type: object
+      properties:
+        itemId:
+          type: integer
+          description: Like or Dislike id
+        userId:
+          type: integer
+          description: User id.
+        itemType:
+          type: string
+          enum: 
+            - post
+            - comment
+          description: Item type.
+        isLike:
+          type: boolean
+          description: Like or Dislike.
+        createdAt:
+          type: string
+          format: date
+          description: Date of created item.
+    CreateLikeDto:
+      type: object
+      properties:
+        isLike:
+          type: boolean
+          description: Like or Dislike.
+    Token:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        expAccessToken:
+          type: integer
+        refreshToken:
+          type: string
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+        statusCode:
+          type: integer
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              property:
+                type: string
+              constraint:
+                type: array
+                items:
+                  type: string
+  securitySchemes:
+    api_key:
+      type: apiKey
+      name: authorization
+      in: header
+      description: Bearer <YOUR_TOKEN>
+        
+      
+      
+      
+            
+      
