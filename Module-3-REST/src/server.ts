@@ -8,7 +8,7 @@ import { HttpError } from 'http-errors'
 const app = express()
 const PORT = process.env.PORT || 3000
 const ENVIROMENT = process.env.NODE_ENV || 'development'
-app.set('port',process.env.PORT || 3000) 
+// app.set('port',process.env.PORT || 3000) 
 
 
 app.use(express.urlencoded({ extended: true }))
