@@ -22,7 +22,7 @@ model User {
     isFLnamePublic  Boolean   @default(false) @map("is_first_lastname_public")
     createdAt       DateTime  @default(now()) @map("created_at")
     updatedAt       DateTime  @updatedAt @map("updated_at")
-    deleteddAt      DateTime  @updatedAt @map("deleted_at")
+    deletedAt      DateTime?  @map("deleted_at")
     posts           Post[]
     comments        Comment[]
     tokens          Token[]
@@ -31,14 +31,15 @@ model User {
 model Post {
     id          Int      @id @default(autoincrement())
     isDraft     Boolean  @default(true) @map("is_draft")
-    title       String   @db.VarChar(255)
+    title       String   @db.VarChar(100)
+    brief       String    @db.VarChar(255)
     content     String?   @db.Text  
     image       String?  
     createdAt   DateTime @default(now()) @map("created_at")
     updatedAt   DateTime @updatedAt @map("updated_at")
-    deleteddAt  DateTime  @updatedAt @map("deleted_at")
-    author      User     @relation(fields: [authorId], references: [id])
-    authorId    Int
+    deletedAt   DateTime?  @map("deleted_at")
+    author      User?     @relation(fields: [authorId], references: [id])
+    authorId    Int?
     comments    Comment[]
     categories  Category[]
   @@map("posts")
@@ -50,7 +51,7 @@ model Comment {
     content     String   @db.VarChar(255)
     createdAt   DateTime @default(now()) @map("created_at")
     updatedAt   DateTime @updatedAt @map("updated_at")
-    deleteddAt  DateTime  @updatedAt @map("deleted_at")
+    deleteddAt  DateTime? @map("deleted_at")
     author      User     @relation(fields: [authorId], references: [id])
     authorId    Int
     Post        Post?   @relation(fields: [postId], references: [id])
