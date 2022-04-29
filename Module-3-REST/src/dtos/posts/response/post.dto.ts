@@ -1,4 +1,4 @@
-import { Category, User } from '@prisma/client'
+import { Category, Comment, User } from '@prisma/client'
 import { Exclude, Expose, Transform } from 'class-transformer'
 import { IsDate, IsInt, IsNumber, IsString } from 'class-validator'
 import { EnumType } from 'typescript'
@@ -30,6 +30,8 @@ export class PostDto {
 
   @Expose()
   readonly  authorId: number
+  @Expose()
+  readonly  comments: Comment[]
 
   @Expose()
   @Transform(({ value }) => value?.toISOString())
