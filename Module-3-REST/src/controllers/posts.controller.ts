@@ -29,7 +29,7 @@ export async function findOne(req: Request, res: Response): Promise<void> {
     await dto.isValid()
     const post = await PostsService.update(parseInt(req.params.id), dto)
   
-    res.status(200).json(plainToClass(PostDto, post))
+    res.status(200).json(post)
   }
 
   export async function deletePost(req: Request, res:Response): Promise<void> {

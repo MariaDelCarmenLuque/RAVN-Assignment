@@ -10,17 +10,18 @@ export class PostsService {
     static async find(): Promise<Post[]> {
         const posts = await  prisma.post.findMany(
             {
-                orderBy: {createdAt: 'asc'}
+                orderBy: {createdAt: 'asc'},
+                include: {comments:true}
             })
         return plainToInstance(PostDto,posts)
     }
     static async findOne(id:number) {
-        const postFound = await prisma.post.findUnique({where: {id}})
+        const postFound = await prisma.post.findUnique({where: {id}, include: {comments:true}})
 
         return plainToClass(PostDto,postFound)
     }
     static async create(input: CreatePostDto):Promise<Post> {
-        const newPost = prisma.post.create({ data: input})
+        const newPost = prisma.post.create({ data: input, include:{comments:true}})
         return plainToClass(PostDto, newPost)
     }
 
