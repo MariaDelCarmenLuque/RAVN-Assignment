@@ -1,6 +1,6 @@
 import { Category, Comment, User } from '@prisma/client'
 import { Exclude, Expose, Transform } from 'class-transformer'
-import { IsDate, IsInt, IsNumber, IsString } from 'class-validator'
+import { IsBoolean, IsDate, IsInt, IsNumber, IsString } from 'class-validator'
 import { EnumType } from 'typescript'
 
 @Exclude()
@@ -14,7 +14,7 @@ export class PostDto {
   readonly title: string
 
   @Expose()
-  @IsString()
+  @IsBoolean()
   readonly isDraft: boolean
 
   @Expose()

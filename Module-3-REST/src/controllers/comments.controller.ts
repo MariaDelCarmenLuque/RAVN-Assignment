@@ -2,8 +2,6 @@ import { plainToClass } from "class-transformer";
 import { Request, Response } from "express";
 import { CreateCommentDto } from "../dtos/comments/request/create-comment.dto";
 import { UpdateCommentDto } from "../dtos/comments/request/update-comment.dto";
-import { CommentDto } from "../dtos/comments/response/comment.dto";
-import { prisma } from "../prisma";
 import { CommentsService } from "../services/comments.service";
 
 export async function find(req:Request, res: Response): Promise<void>{

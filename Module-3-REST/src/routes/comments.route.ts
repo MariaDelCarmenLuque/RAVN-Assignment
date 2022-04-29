@@ -6,18 +6,31 @@ import {
     deleteComment,
     create as createComment
 } from '../controllers/comments.controller'
-const router = express.Router()
+import {
+    findLikesComment ,
+    updateLikeComment ,
+    deleteLikeComment
+} from '../controllers/likes.controller'
+const router = express.Router({mergeParams:true})
 export function commentsRoutes(): Router {
     router
-        .route('/:idPost/comments')
+        .route('/')
         // .all(passport.authenticate('jwt', {session:false}))
         .get(asyncHandler(findComments))
         .post(asyncHandler(createComment))
     
     router
-        .route('/:idPost/comments/:idComment')
+        .route('/:idComment')
         // .all(passport.authenticate('jwt', {session:false}))
         .patch(asyncHandler(update))
         .delete(asyncHandler(deleteComment))   
+    router
+        .route('/:idComment/likes')
+        // .all(passport.authenticate('jwt', {session:false}))
+        .get(asyncHandler(findLikesComment))
+        .patch(asyncHandler(updateLikeComment))
+    router
+        .route('/:idComment/likes/:idLike')
+        .delete(asyncHandler(deleteLikeComment))   
     return router
 }
