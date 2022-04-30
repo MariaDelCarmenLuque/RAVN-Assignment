@@ -1,50 +1,83 @@
-import { Prisma, User } from "@prisma/client";
-import createError from "http-errors";
+
+import { Prisma, Token } from "@prisma/client";
+import { hashSync } from "bcryptjs";
+import { plainToClass, plainToInstance } from "class-transformer";
+import {UnprocessableEntity, NotFound} from "http-errors";
+import { TokenDto } from "../dtos/auths/response/token.dto";
 import { CreateUserDto } from "../dtos/users/request/create-user.dto";
 import { UpdateUserDto } from "../dtos/users/request/update-user.dto";
+import { UserDto } from "../dtos/users/response/user.dto";
 import { prisma } from "../prisma";
+import { PrismaErrorEnum } from "../utils/enums";
+import { AuthService } from "./auth.service";
 
 export class UsersService {
-    static async find(): Promise<User[]> {
-        return prisma.user.findMany(
+    static async find(): Promise<UserDto[]> {
+        const users= await prisma.user.findMany(
             {
                 orderBy: {createdAt: 'desc'}
             })
+        return plainToInstance(UserDto,users)
     }
 
-    static async findOne(id:number) {
-            return prisma.user.findUnique({where: {id}})
+    static async findOne(id:number): Promise<UserDto> {
+            const user= await prisma.user.findUnique({where: {id}})
+            return plainToClass(UserDto, user)
     }
     
-    static async create(input: CreateUserDto):Promise<User> {
-        if (await prisma.user.count({ where: {email: input.email}})){
-            throw new createError.UnprocessableEntity('Email already taken')
+    static async create(input: CreateUserDto):Promise<TokenDto> {
+        const userFound = await prisma.user.findUnique({
+            where: { email: input.email },
+            select: { id: true },
+            rejectOnNotFound: false,
+        })
+      
+        if (userFound) {
+            throw new UnprocessableEntity('email already taken')
         }
-
-        return prisma.user.create({ data: input})
+        //No entra a crear un usuario
+        const user = await prisma.user.create({
+            data: {
+             ...input,
+              password: hashSync(input.password, 10),
+             
+            },
+          }) 
+ 
+        const token = await AuthService.createToken(user.id)
+        return AuthService.generateAccessToken(token.jti)
     }
 
-    static async update(id:number, input:UpdateUserDto): Promise<User> {
+    static async update(id:number, {password, ...input }:UpdateUserDto): Promise<UserDto> {
         try {
             const user = await prisma.user.update({
-                data: input,
+                data: {
+                    ...input,
+                ...(password&& {password: hashSync(password,10)})},
                 where: {
                     id,
                 },
             }) 
-            return user
+            return plainToClass(UserDto,user)
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError){
-                if (error.code === 'P2002') {
-                    throw new createError.UnprocessableEntity('Email already taken')
-                }
+                switch (error.code) {
+                    case PrismaErrorEnum.NOT_FOUND:
+                      throw new NotFound('User not found')
+                    case PrismaErrorEnum.DUPLICATED:
+                      throw new UnprocessableEntity('email already taken')
+                    default:
+                      throw error
+                  }
             }
         throw error
         }
     }
 
     static async delete(id:number){
+        const user = await prisma.user.delete({ where: { id } })
 
+        return plainToClass(UserDto, user)
     }
 
    
