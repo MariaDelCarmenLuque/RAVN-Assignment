@@ -10,4 +10,5 @@ export class TokenDto {
 
   @Expose()
   readonly refreshToken: string
+  
 }
