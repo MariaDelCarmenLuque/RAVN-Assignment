@@ -19,6 +19,12 @@ export class UserDto {
   readonly email: string
 
   @Expose()
+  readonly isEmailPublic: boolean
+
+  @Expose()
+  readonly isFLnamePublic: boolean
+
+  @Expose()
   readonly imageUrl: string
 
   @Expose()
