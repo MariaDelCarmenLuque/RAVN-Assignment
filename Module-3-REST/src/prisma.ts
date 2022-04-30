@@ -1,8 +1,8 @@
 import { PrismaClient } from '@prisma/client'
-import createHttpError, { NotFound } from 'http-errors'
+import { NotFound } from 'http-errors'
 
 export const prisma = new PrismaClient({
-    rejectOnNotFound: (error) => new NotFound(error.message),
+    // rejectOnNotFound: (error) => new NotFound(error.message),
 })
 async function main() {
 }
