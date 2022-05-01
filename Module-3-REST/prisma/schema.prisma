@@ -16,7 +16,7 @@ model User {
     lastName        String    @map("last_name")
     email           String    @unique
     password        String
-    imageUrl        String    @map("image_url")
+    imageUrl        String?    @map("image_url")
     role            Role      @default(USER)
     isEmailPublic   Boolean   @default(false) @map("is_email_public")
     isFLnamePublic  Boolean   @default(false) @map("is_first_lastname_public")
@@ -79,9 +79,9 @@ model Like {
 model Token {
   id            Int      @id @default(autoincrement())
   jti           String   @unique @default(uuid())
-  refreshToken  String   @unique @map("refresh_token")
+  refreshToken  String?   @unique @map("refresh_token")
   createdAt     DateTime @default(now()) @map(name: "created_at")
-  expiredAt     DateTime @map("expired_at")
+  expiredAt     String @map("expired_at")
   user          User?    @relation(fields: [userId], references: [id])
   userId        Int?     @map(name: "user_id")
   @@map("tokens")

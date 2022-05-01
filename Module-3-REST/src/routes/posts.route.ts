@@ -13,27 +13,29 @@ import {
     updateLikePost,
     deleteLike
 } from '../controllers/likes.controller'
+import passport from "passport"
+import { validateAdmin, validateUser } from "../guards/user.guard"
+
 const router = express.Router()
 export function postsRoutes(): Router {
     router
         .route('/')
-        // .all(passport.authenticate('jwt', {session:false}))
         .get(asyncHandler(findPosts))
-        .post(asyncHandler(createPost))
+        .post(passport.authenticate('jwt', {session:false}),validateUser,asyncHandler(createPost))
     
     router
         .route('/:idPost')
-        // .all(passport.authenticate('jwt', {session:false}))
         .get(asyncHandler(findOne))
-        .patch(asyncHandler(update))
-        .delete(asyncHandler(deletePost))  
+        .patch(passport.authenticate('jwt', {session:false}),validateUser,asyncHandler(update))
+        .delete(passport.authenticate('jwt', {session:false}),asyncHandler(deletePost))  
     router
         .route('/:idPost/likes')
-        // .all(passport.authenticate('jwt', {session:false}))
+        .all(passport.authenticate('jwt', {session:false}),validateUser)
         .get(asyncHandler(findLikesPost))
         .patch(asyncHandler(updateLikePost))
     router
         .route('/:idPost/likes/:idLike')
+        .all(passport.authenticate('jwt', {session:false}),validateUser)
         .delete(asyncHandler(deleteLike))   
     return router
 }

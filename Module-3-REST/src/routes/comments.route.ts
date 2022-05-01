@@ -1,5 +1,6 @@
 import express,{ Router } from "express"
 import asyncHandler from 'express-async-handler'
+import passport from "passport"
 import {
     find as findComments,
     update,
@@ -11,26 +12,25 @@ import {
     updateLikeComment ,
     deleteLikeComment
 } from '../controllers/likes.controller'
+import { validateUser } from "../guards/user.guard"
 const router = express.Router({mergeParams:true})
 export function commentsRoutes(): Router {
     router
         .route('/')
-        // .all(passport.authenticate('jwt', {session:false}))
         .get(asyncHandler(findComments))
-        .post(asyncHandler(createComment))
+        .post(passport.authenticate('jwt', {session:false}),validateUser,asyncHandler(createComment))
     
     router
         .route('/:idComment')
-        // .all(passport.authenticate('jwt', {session:false}))
+        .all(passport.authenticate('jwt', {session:false}),validateUser)
         .patch(asyncHandler(update))
         .delete(asyncHandler(deleteComment))   
     router
         .route('/:idComment/likes')
-        // .all(passport.authenticate('jwt', {session:false}))
         .get(asyncHandler(findLikesComment))
-        .patch(asyncHandler(updateLikeComment))
+        .patch(passport.authenticate('jwt', {session:false}),validateUser,asyncHandler(updateLikeComment))
     router
         .route('/:idComment/likes/:idLike')
-        .delete(asyncHandler(deleteLikeComment))   
+        .delete(passport.authenticate('jwt', {session:false}),validateUser,asyncHandler(deleteLikeComment))   
     return router
 }
