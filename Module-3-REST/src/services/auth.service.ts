@@ -1,12 +1,15 @@
 
-import { Prisma, Token } from '@prisma/client';
+import { Prisma, Role, Token, User } from '@prisma/client';
 import { compareSync} from 'bcryptjs';
-import { Unauthorized, NotFound } from 'http-errors';
+import { plainToClass } from 'class-transformer';
+import { Unauthorized, NotFound , Forbidden} from 'http-errors';
 import {verify,sign} from 'jsonwebtoken'
 import { LoginDto } from "../dtos/auths/request/login.dto";
 import { TokenDto } from '../dtos/auths/response/token.dto';
+import { UserDto } from '../dtos/users/response/user.dto';
 import { prisma } from "../prisma";
 import { PrismaErrorEnum } from '../utils/enums';
+import { Authenticated } from '../utils/types';
 
 export class AuthService {
   static async login(input: LoginDto): Promise<TokenDto> {
@@ -17,6 +20,7 @@ export class AuthService {
     if (!user) {
       throw new Unauthorized('Invalid credential')
     }
+    // check password
     const isValidPassword = compareSync(input.password, user.password)
     if (!isValidPassword) {
       throw new Unauthorized('Invalid credentials')
@@ -49,6 +53,7 @@ export class AuthService {
         throw error
       }
     }
+
   static generateAccessToken(sub: string): TokenDto {
       const now = new Date().getTime()
       const exp = Math.floor(
@@ -78,6 +83,7 @@ export class AuthService {
         refreshToken
       }
     }
+
   static async logout(accessToken?: string): Promise<void> {
     if (!accessToken) return
 
@@ -88,5 +94,22 @@ export class AuthService {
     } catch (error) {
       console.error(error)
     }
-      }
+  }
+
+  static validateUser({ user }: Authenticated<User>): void {
+    if (user.role !== 'USER') {
+      throw new Forbidden(
+        'The current user does not have the enough privileges',
+      )
+    }
+  }
+
+  static validateAdmin({ user }: Authenticated<User>): void {
+    if (user.role !== 'ADMIN') {
+      throw new Forbidden(
+        'The current user does not have the enough privileges',
+      )
+    }
+  }
+
 }
