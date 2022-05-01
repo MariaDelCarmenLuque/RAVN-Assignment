@@ -4,7 +4,7 @@ import { LoginDto } from "../dtos/auths/request/login.dto";
 import { AuthService } from "../services/auth.service";
 
 
-export async function login(req:Request,res:Response) {
+export async function login(req:Request,res:Response): Promise<void> {
     const dto= plainToClass (LoginDto, req.body)
     await dto.isValid()
 
@@ -12,6 +12,8 @@ export async function login(req:Request,res:Response) {
     res.status(200).json(result)
 }
 
-// export async function logout(req: Request, res: Response): Promise<void> {
-//     res.status(204).send()
-//   }
+export async function logout(req: Request, res: Response): Promise<void> {
+    const accessToken = req.headers.authorization?.replace('Bearer ', '')
+    await AuthService.logout(accessToken)
+    res.status(204).send()
+  }

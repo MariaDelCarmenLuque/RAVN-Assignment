@@ -12,6 +12,7 @@ import { PrismaErrorEnum } from "../utils/enums";
 import { AuthService } from "./auth.service";
 
 export class UsersService {
+   
     static async find(): Promise<UserDto[]> {
         const users= await prisma.user.findMany(
             {
@@ -33,17 +34,16 @@ export class UsersService {
         })
       
         if (userFound) {
-            throw new UnprocessableEntity('email already taken')
+            throw new UnprocessableEntity('email already taken.')
         }
-        //No entra a crear un usuario
+        const encryptedPassword =hashSync(input.password, 10)
         const user = await prisma.user.create({
             data: {
              ...input,
-              password: hashSync(input.password, 10),
+              password: encryptedPassword,
              
             },
           }) 
- 
         const token = await AuthService.createToken(user.id)
         return AuthService.generateAccessToken(token.jti)
     }
