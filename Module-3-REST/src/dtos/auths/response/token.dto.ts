@@ -1,4 +1,5 @@
 import { Exclude, Expose } from 'class-transformer'
+import { IsOptional } from 'class-validator'
 
 @Exclude()
 export class TokenDto {
@@ -9,6 +10,7 @@ export class TokenDto {
   readonly exp: number
 
   @Expose()
+  @IsOptional()
   readonly refreshToken: string
   
 }

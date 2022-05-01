@@ -1,6 +1,5 @@
 import { Role } from "@prisma/client"
-import { Exclude, Expose } from "class-transformer"
-import { IsEmail, IsNotEmpty, IsOptional, IsString, Length } from "class-validator"
+import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, Length } from "class-validator"
 import { BaseDto } from "../../base.dto"
 
 
@@ -26,6 +25,7 @@ export class CreateUserDto extends BaseDto {
   @Length(8, 20)
   readonly password: string
 
-  
-
+  @IsNotEmpty()
+  @IsOptional()
+  readonly role: Role
 }

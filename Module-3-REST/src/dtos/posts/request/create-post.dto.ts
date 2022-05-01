@@ -1,5 +1,5 @@
 
-import { IsBoolean, IsInt, isInt, IsNumber, isNumber, IsString, Max, MaxLength } from "class-validator";
+import { IsBoolean, IsString, MaxLength } from "class-validator";
 import { BaseDto } from "../../base.dto";
 
 export class CreatePostDto extends BaseDto{
