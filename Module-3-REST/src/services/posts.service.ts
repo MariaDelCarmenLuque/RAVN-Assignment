@@ -17,7 +17,6 @@ export class PostsService {
     }
     static async findOne(id:number) {
         const postFound = await prisma.post.findUnique({where: {id}, include: {comments:true}})
-
         return plainToClass(PostDto,postFound)
     }
     static async create(input: CreatePostDto):Promise<Post> {
