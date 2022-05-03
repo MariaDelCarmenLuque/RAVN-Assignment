@@ -97,7 +97,7 @@ export class AuthService {
   }
 
   static validateUser({ user }: Authenticated<User>): void {
-    if (user.role !== 'USER') {
+    if (user.type !== 'USER') {
       throw new Forbidden(
         'The current user does not have the enough privileges',
       )
@@ -105,7 +105,7 @@ export class AuthService {
   }
 
   static validateAdmin({ user }: Authenticated<User>): void {
-    if (user.role !== 'ADMIN') {
+    if (user.type !== 'ADMIN') {
       throw new Forbidden(
         'The current user does not have the enough privileges',
       )

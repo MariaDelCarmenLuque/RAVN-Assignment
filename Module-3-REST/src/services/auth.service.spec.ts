@@ -109,19 +109,18 @@ describe('AuthService', () => {
       expect(spyConsole).toBeCalledWith(new JsonWebTokenError('jwt malformed'))
     })
 
-    // it('should delete the token', async () => {
-    //   const token = await tokenFactory.make({
-    //     user: { connect: { id: (await userFactory.make()).id } },
-    //   })
+    it('should delete the token', async () => {
+      const token = await tokenFactory.make({
+        user: {connect: {id: (await userFactory.make()).id}},
+      expiredAt:''})
+      jest
+        .spyOn(jwt, 'verify')
+        .mockImplementation(jest.fn(() => ({ sub: token.jti })))
 
-    //   jest
-    //     .spyOn(jwt, 'verify')
-    //     .mockImplementation(jest.fn(() => ({ sub: token.jti })))
+      const result = await AuthService.logout(faker.lorem.word())
 
-    //   const result = await AuthService.logout(faker.lorem.word())
-
-    //   expect(result).toBeUndefined()
-    // })
+      expect(result).toBeUndefined()
+    })
   })
 
   describe('generateAccessToken', () => {
@@ -143,7 +142,7 @@ describe('AuthService', () => {
 
     it('should accept if the user was an user', () => {
       const data: Authenticated<User> = { user: { ...user, type: 'USER' } }
-
+console.log(user,data)
       expect(AuthService.validateUser(data)).toBeUndefined()
     })
 
@@ -160,18 +159,18 @@ describe('AuthService', () => {
     let admin: User
 
     beforeAll(async () => {
-      admin = await userFactory.make()
+      // admin = await userFactory.make({role:'ADMIN'})
     })
 
     it('should accept if the user was an admin', () => {
       const data: Authenticated<User> = { user: { ...admin, type: 'ADMIN' } }
-
+      // const admin =  userFactory.make({role: 'USER'})
       expect(AuthService.validateAdmin(data)).toBeUndefined()
     })
 
     it("should throw an error if the user wasn't an admin", async () => {
       const data: Authenticated<User> = { user: { ...admin, type: 'USER' } }
-
+console.log(data)
       expect(() => AuthService.validateAdmin(data)).toThrowError(
         new Forbidden('The current user does not have the enough privileges'),
       )
