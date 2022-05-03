@@ -44,6 +44,6 @@ export class CommentsService {
                 deletedAt: new Date(),
             }
         }) 
-
+        return plainToClass(CommentDto,deleteComment)
     }
 }

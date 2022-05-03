@@ -15,7 +15,7 @@ export function authRoutes(): Router {
   .post(asyncHandler(logout))
   router
   .route('/register')
-  .post(register)
+  .post(asyncHandler(register))
 //   router.route('/confirmUser').post(asyncHandler(confirmUser))
 
   return router

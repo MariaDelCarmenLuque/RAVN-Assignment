@@ -27,7 +27,7 @@ export function postsRoutes(): Router {
         .route('/:idPost')
         .get(asyncHandler(findOne))
         .patch(passport.authenticate('jwt', {session:false}),validateUser,asyncHandler(update))
-        .delete(passport.authenticate('jwt', {session:false}),asyncHandler(deletePost))  
+        .delete(asyncHandler(deletePost))  
     router
         .route('/:idPost/likes')
         .all(passport.authenticate('jwt', {session:false}),validateUser)

@@ -1,6 +1,5 @@
 import { Post, Prisma } from "@prisma/client";
 import { plainToClass, plainToInstance } from "class-transformer";
-import createError from "http-errors";
 import { CreatePostDto } from "../dtos/posts/request/create-post.dto";
 import { UpdatePostDto } from "../dtos/posts/request/update-post.dto";
 import { PostDto } from "../dtos/posts/response/post.dto";
@@ -15,9 +14,8 @@ export class PostsService {
             })
         return plainToInstance(PostDto,posts)
     }
-    static async findOne(id:number) {
-        const postFound = await prisma.post.findUnique({where: {id}, include: {comments:true}})
-
+    static async findOne(id:number):Promise<Post> {
+        const postFound = await prisma.post.findUnique({where: {id}, include: {comments:true}, rejectOnNotFound: true})
         return plainToClass(PostDto,postFound)
     }
     static async create(input: CreatePostDto):Promise<Post> {
@@ -44,6 +42,6 @@ export class PostsService {
                 deletedAt: new Date(),
             }
         }) 
-
+        return plainToClass(PostDto,deletePost)
     }
 }

@@ -1,5 +1,5 @@
 import { Request,Response } from "express"
-import { plainToClass, plainToInstance } from "class-transformer"
+import { plainToClass } from "class-transformer"
 import { UsersService } from "../services/users.service"
 import { CreateUserDto } from "../dtos/users/request/create-user.dto"
 import { UpdateUserDto } from "../dtos/users/request/update-user.dto"

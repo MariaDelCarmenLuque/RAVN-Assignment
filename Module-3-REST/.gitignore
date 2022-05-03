@@ -19,3 +19,6 @@ jspm_packages/
 
 # generate output
 dist
+
+# Coverage directory used by tools like istanbul
+coverage
