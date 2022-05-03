@@ -1,18 +1,22 @@
-import dotenv from 'dotenv'
-dotenv.config()
+// import dotenv from 'dotenv'
+// dotenv.config()
+import 'reflect-metadata'
 import express, {NextFunction, Request,Response} from 'express'
 import cors, { CorsOptions } from 'cors'
 import { router } from './router'
+import './guards/passport'
 import { HttpError } from 'http-errors'
+import passport from 'passport'
+import { plainToClass } from 'class-transformer'
+import { HttpErrorDto } from './dtos/http-error.dto'
 
 const app = express()
 const PORT = process.env.PORT || 3000
 const ENVIROMENT = process.env.NODE_ENV || 'development'
-// app.set('port',process.env.PORT || 3000) 
 
-
-app.use(express.urlencoded({ extended: true }))
+app.use(passport.initialize())
 app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 const whiteList = ['http://localhost:3000']
 const corsOptionsDelegate = function handler(
   req: Request,
@@ -39,10 +43,11 @@ function errorHandler(
   }
 
   res.status(err.status ?? 500)
-  res.json(err)
+  res.json(plainToClass(HttpErrorDto,err))
 }
 
 app.use(cors(corsOptionsDelegate))
+
 app.get('/api/v1/status', (req: Request, res: Response) => {
     res.json({ time: new Date() })
   })

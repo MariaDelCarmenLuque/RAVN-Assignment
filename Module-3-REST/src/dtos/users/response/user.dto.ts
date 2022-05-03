@@ -1,3 +1,4 @@
+import { Role } from '@prisma/client'
 import { Exclude, Expose, Transform } from 'class-transformer'
 import { EnumType } from 'typescript'
 
@@ -19,10 +20,16 @@ export class UserDto {
   readonly email: string
 
   @Expose()
+  readonly isEmailPublic: boolean
+
+  @Expose()
+  readonly isFLnamePublic: boolean
+
+  @Expose()
   readonly imageUrl: string
 
   @Expose()
-  readonly role: EnumType
+  readonly role: Role
 
   @Expose()
   @Transform(({ value }) => value?.toISOString())

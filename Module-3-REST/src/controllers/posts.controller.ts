@@ -33,7 +33,10 @@ export async function findOne(req: Request, res: Response): Promise<void> {
   }
 
   export async function deletePost(req: Request, res:Response): Promise<void> {
-      const post = await PostsService.delete(parseInt(req.params.idPost))
-     
-      res.status(200).json('Post deleted')
+      const post = await PostsService.findOne(parseInt(req.params.idPost))
+      if(!post){
+        res.status(404).json('Post Not Found')
+      } else {
+        await PostsService.delete(parseInt(req.params.idPost))
+        res.status(200).json('Post deleted')}
   }
