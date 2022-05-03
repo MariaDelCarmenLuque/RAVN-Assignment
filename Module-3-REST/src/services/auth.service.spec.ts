@@ -142,7 +142,6 @@ describe('AuthService', () => {
 
     it('should accept if the user was an user', () => {
       const data: Authenticated<User> = { user: { ...user, type: 'USER' } }
-console.log(user,data)
       expect(AuthService.validateUser(data)).toBeUndefined()
     })
 
@@ -159,18 +158,15 @@ console.log(user,data)
     let admin: User
 
     beforeAll(async () => {
-      // admin = await userFactory.make({role:'ADMIN'})
     })
 
     it('should accept if the user was an admin', () => {
       const data: Authenticated<User> = { user: { ...admin, type: 'ADMIN' } }
-      // const admin =  userFactory.make({role: 'USER'})
       expect(AuthService.validateAdmin(data)).toBeUndefined()
     })
 
     it("should throw an error if the user wasn't an admin", async () => {
       const data: Authenticated<User> = { user: { ...admin, type: 'USER' } }
-console.log(data)
       expect(() => AuthService.validateAdmin(data)).toThrowError(
         new Forbidden('The current user does not have the enough privileges'),
       )
