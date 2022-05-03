@@ -1,12 +1,12 @@
 import { Post } from "@prisma/client";
 import faker from "@faker-js/faker";
 import { plainToClass } from "class-transformer";
-import { CreatePostDto } from "../dtos/posts/request/create-post.dto";
 import { clearDatabase, prisma } from "../prisma";
 import { PostFactory } from "../utils/factories/post.factory";
 import { PostsService } from "./posts.service";
 import { UpdatePostDto } from "../dtos/posts/request/update-post.dto";
-import { NotFound, UnprocessableEntity } from "http-errors";
+import { NotFound } from "http-errors";
+import { CreatePostDto } from "../dtos/posts/request/create-post.dto";
 
 jest.spyOn(console, "error").mockImplementation(jest.fn());
 
@@ -39,15 +39,22 @@ describe("PostService", () => {
   });
 
   describe("create", () => {
-    let post: Post;
     beforeAll(async () => {
-      post = await postFactory.make();
-      
+      jest.mock("jsonwebtoken", () => ({
+        sign: jest.fn().mockImplementation(() => "my.jwt.token"),
+      }));
     });
     it("should create a new post", async () => {
-      const data = plainToClass(CreatePostDto, post);
+      const a = {
+        title:  faker.datatype.string(100),
+        image: faker.image.image(),
+        brief: faker.datatype.string(255),
+        isDraft: faker.datatype.boolean(),
+        content: faker.lorem.paragraph(),
+      }
+      const data = plainToClass(CreatePostDto, a);
       const result = await PostsService.create(data);
-      expect(result.id).toBeTruthy();
+      expect(data).toHaveProperty('title',result.title);
     });
   });
 
