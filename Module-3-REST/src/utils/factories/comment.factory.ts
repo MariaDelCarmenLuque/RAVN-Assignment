@@ -1,6 +1,7 @@
 import faker from '@faker-js/faker'
 import { Comment, Prisma, PrismaClient } from "@prisma/client";
 import { AbstractFactory } from "./abstract.factory";
+import { PostFactory } from './post.factory';
 
 type CommentInput = Partial<Prisma.CommentCreateInput>
 
@@ -9,11 +10,12 @@ export class CommentFactory extends AbstractFactory<Comment> {
         super()
       }
 async make(input: CommentInput ={}): Promise<Comment>{
+ 
     return this.prismaClient.comment.create({
         data: {
-            ...input,           
+            ...input,
             isDraft: input.isDraft ?? faker.datatype.boolean(),
-            content: input.content ?? faker.lorem.paragraph(),
+            content: input.content ?? faker.datatype.string(255),
         },
      })
 }
